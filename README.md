@@ -1,8 +1,15 @@
 
-# EMA Demo
+# Agent-Oriented Microservices Demo
 
-This simple demonstration project shows off the EMA architectural approach.
-EMA is the *emergent microservice architecture*.
+This simple demonstration project shows off the
+[Agent-Oriented Microservices][aom]
+architectural approach.  See that article, and its [follow-up][aom2], for
+more details.
+
+ [aom]: https://www.linkedin.com/pulse/agent-oriented-microservices-part-i-hemi-trickey
+
+(An earlier name I used for this concept was "Emergent Microservice
+Architecture"; that name is still used in this code.)
 
 To make the demonstration more complete, this project uses the Amazon Kinesis
 service for event streaming, and it provides six independent agents written in
