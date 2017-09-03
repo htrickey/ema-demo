@@ -7,6 +7,7 @@ architectural approach.  See that article, and its [follow-up][aom2], for
 more details.
 
  [aom]: https://www.linkedin.com/pulse/agent-oriented-microservices-part-i-hemi-trickey
+ [aom2]: https://www.linkedin.com/pulse/agent-oriented-microservices-part-ii-implemented-hemi-trickey
 
 (An earlier name I used for this concept was "Emergent Microservice
 Architecture"; that name is still used in this code.)
