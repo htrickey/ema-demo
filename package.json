@@ -1,0 +1,15 @@
+{
+  "name": "ema-demo",
+  "version": "1.0.0",
+  "description": "Emergent Microservice Architecture Demo",
+  "dependencies": {
+    "aws-sdk": "^2.106.0",
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hemi Trickey",
+  "license": "MIT"
+}

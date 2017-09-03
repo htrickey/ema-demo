@@ -1,0 +1,100 @@
+#!/bin/bash
+
+jsgenerator=tools/simulated-event-generator.js
+jswatcher=tools/watch-all-events.js
+jsagents="
+  agents-nodejs/agent-national-offers.js
+  agents-nodejs/agent-store-offers.js
+  agents-nodejs/agent-personalized-offers.js
+  agents-nodejs/agent-user-profile-manager.js
+  agents-nodejs/agent-offer-collector.js
+"
+jaragents="
+  agents-java/agent-frequent-visitor-identification.jar
+"
+
+export NODE_PATH=.
+
+nodejs_opts=
+
+for option; do
+  case $option in
+    --nokinesis)
+      nodejs_opts="${nodejs_opts} --nokinesis"
+      ;;
+    --noagent*)
+      jsagents=""
+      jaragents=""
+      ;;
+    --nogen*)
+      jsgenerator=""
+      ;;
+    --nowatch*)
+      jswatcher=""
+      ;;
+  esac
+done
+
+
+# Format codes for terminal output
+
+bold=`tput bold`
+normal=`tput sgr0`
+
+function filter_all_output() {
+  title=$1
+  if [ -n "$title" ] ; then
+    prefix="${bold}${title}:${normal} "
+  fi
+
+  sed -E \
+      -e "s/^/${prefix}/" \
+      -e "s/(read rate exceeded)/${bold}\1${normal}/"
+}
+
+if [ -n "$jswatcher" ] ; then
+  echo ${bold}starting event watcher...${normal}
+  node $jswatcher ${nodejs_opts} &
+fi
+
+echo -n "${bold}starting agents: ${normal}"
+for agent in $jsagents ; do
+  sleep 1   # avoid hitting Kinesis throttle limits
+  agent_title=$(node $agent --name)
+  if [ -z "$agent_title" ] ; then
+    agent_title=${agent%.js}
+  fi
+  echo -n "$agent_title "
+  node $agent ${nodejs_opts} &
+done
+
+for agent in $jaragents ; do
+  sleep 1
+  agent_title=$(java -jar $agent --name 2>/dev/null)
+  if [ -z "$agent_title" ] ; then
+    echo "Warning: $agent did not run correctly"
+    echo "Is it built/installed properly? (see agents-java/project/build.sh)"
+    echo "Skipping..."
+  else
+    echo "$agent_title"
+    java -jar $agent >/dev/null 2>&1 &
+  fi
+done
+
+echo
+
+if [ -n "$jsgenerator" ] ; then
+  sleep 1
+  echo ${bold}starting simulated event source...${normal}
+  node $jsgenerator ${nodejs_opts} & #| filter_all_output Simulator &
+fi
+
+
+function cleanup() {
+  kill $(jobs -p) 2>/dev/null
+}
+
+trap cleanup INT
+
+wait $(jobs -p)
+
